@@ -117,12 +117,9 @@ func parseWindow(s string) (codeWindow, error) {
 	return w, nil
 }
 
-// badRange reports a window whose line_to is before its line_from.
-func (w codeWindow) badRange() string {
-	if w.LineTo > 0 && w.LineTo < w.LineFrom {
-		return fmt.Sprintf("line_to %d is before line_from %d", w.LineTo, w.LineFrom)
-	}
-	return ""
+// inverted reports a window whose line_to is before its line_from.
+func (w codeWindow) inverted() bool {
+	return w.LineTo > 0 && w.LineTo < w.LineFrom
 }
 
 // maxReadWindows bounds one code_read: a search points at a handful of places.
@@ -162,8 +159,8 @@ func readWindows(args CodeReadArgs) ([]codeWindow, string) {
 		return nil, "pass either path or windows, not both"
 	case args.Path != "":
 		w := codeWindow{Path: args.Path, LineFrom: args.LineFrom, LineTo: args.LineTo}
-		if bad := w.badRange(); bad != "" {
-			return nil, bad
+		if w.inverted() {
+			return nil, fmt.Sprintf("line_to %d is before line_from %d", w.LineTo, w.LineFrom)
 		}
 		return []codeWindow{w}, ""
 	case len(args.Windows) == 0:
@@ -180,8 +177,8 @@ func readWindows(args CodeReadArgs) ([]codeWindow, string) {
 		if w.Path == "" {
 			return nil, "every window needs a path"
 		}
-		if bad := w.badRange(); bad != "" {
-			return nil, fmt.Sprintf("window %q: %s", s, bad)
+		if w.inverted() {
+			return nil, fmt.Sprintf("window %q: line_to %d is before line_from %d", s, w.LineTo, w.LineFrom)
 		}
 		out = append(out, w)
 	}

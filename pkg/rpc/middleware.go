@@ -73,9 +73,7 @@ const logKeyMethod = "method"
 const logArgsCap = 14
 
 // isInternal is the zenrpc convention: 500 and every negative code are ours,
-// everything else is the caller's. The exception is the four JSON-RPC 2.0
-// codes that name a caller's mistake: a body we could not parse, a request
-// that is not one, a method we do not have, params that do not fit.
+// everything else and the JSON-RPC 2.0 caller errors are the caller's.
 func isInternal(e *zenrpc.Error) bool {
 	switch e.Code {
 	case zenrpc.ParseError, zenrpc.InvalidRequest, zenrpc.MethodNotFound, zenrpc.InvalidParams:

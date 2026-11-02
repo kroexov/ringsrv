@@ -12,8 +12,7 @@ import (
 	"github.com/vmkteam/zenrpc/v2"
 )
 
-// Four JSON-RPC 2.0 codes name the caller's mistake. Counted as ours, each one
-// went to Sentry and reached the client as "Internal error".
+// JSON-RPC 2.0 caller errors are not internal; server errors and 500 are.
 func TestIsInternal(t *testing.T) {
 	t.Parallel()
 	for code, want := range map[int]bool{
@@ -31,9 +30,7 @@ func TestIsInternal(t *testing.T) {
 	}
 }
 
-// A client that asks for a method we do not have gets the code and the text
-// that say so, not a -32601 dressed as "Internal error". resources/templates/list
-// is the call that did it in practice: clients send it on connect.
+// An unknown method answers -32601 "Method not found", not "Internal error".
 func TestMCP_UnknownMethodIsNotInternal(t *testing.T) {
 	t.Parallel()
 	srv := newMCPTestServer(t)

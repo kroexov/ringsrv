@@ -117,6 +117,16 @@ func parseWindow(s string) (codeWindow, error) {
 	return w, nil
 }
 
+// badRange names a window that ends before it starts. "148-146" is a typo for
+// "146-148" or for "148-164", and reading either would answer a question nobody
+// asked; the caller is told instead.
+func (w codeWindow) badRange() string {
+	if w.LineTo > 0 && w.LineTo < w.LineFrom {
+		return fmt.Sprintf("line_to %d is before line_from %d", w.LineTo, w.LineFrom)
+	}
+	return ""
+}
+
 // maxReadWindows bounds one code_read: a search points at a handful of places.
 const maxReadWindows = 20
 
@@ -153,7 +163,11 @@ func readWindows(args CodeReadArgs) ([]codeWindow, string) {
 	case args.Path != "" && len(args.Windows) > 0:
 		return nil, "pass either path or windows, not both"
 	case args.Path != "":
-		return []codeWindow{{Path: args.Path, LineFrom: args.LineFrom, LineTo: args.LineTo}}, ""
+		w := codeWindow{Path: args.Path, LineFrom: args.LineFrom, LineTo: args.LineTo}
+		if bad := w.badRange(); bad != "" {
+			return nil, bad
+		}
+		return []codeWindow{w}, ""
 	case len(args.Windows) == 0:
 		return nil, "path or windows is required"
 	case len(args.Windows) > maxReadWindows:
@@ -167,6 +181,9 @@ func readWindows(args CodeReadArgs) ([]codeWindow, string) {
 		}
 		if w.Path == "" {
 			return nil, "every window needs a path"
+		}
+		if bad := w.badRange(); bad != "" {
+			return nil, fmt.Sprintf("window %q: %s", s, bad)
 		}
 		out = append(out, w)
 	}

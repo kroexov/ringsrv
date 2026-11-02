@@ -75,7 +75,9 @@ func sliceLines(lines []string, w Window) *File {
 	if to <= 0 || to > total {
 		to = total
 	}
-	if from > total {
+	// An inverted window is refused by code_read before it gets here; for any
+	// other caller it reads as empty, like one past the end, and never panics.
+	if from > total || to < from {
 		return &File{From: from, To: from, Total: total}
 	}
 

@@ -117,9 +117,7 @@ func parseWindow(s string) (codeWindow, error) {
 	return w, nil
 }
 
-// badRange names a window that ends before it starts. "148-146" is a typo for
-// "146-148" or for "148-164", and reading either would answer a question nobody
-// asked; the caller is told instead.
+// badRange reports a window whose line_to is before its line_from.
 func (w codeWindow) badRange() string {
 	if w.LineTo > 0 && w.LineTo < w.LineFrom {
 		return fmt.Sprintf("line_to %d is before line_from %d", w.LineTo, w.LineFrom)

@@ -6,9 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// code_read refuses an inverted window before it gets here, but the package has
-// other callers: a window sliceLines cannot satisfy comes back empty, never as a
-// panic.
+// sliceLines clamps a window to the file and returns one it cannot satisfy empty.
 func TestSliceLines(t *testing.T) {
 	t.Parallel()
 	lines := []string{"a", "b", "c", "d", "e"}

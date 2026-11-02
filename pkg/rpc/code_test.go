@@ -409,9 +409,7 @@ func TestCodeRead_Windows(t *testing.T) { //nolint:tparallel // subtests share t
 		assert.Equal(t, ErrCodeBadArgs, decodeErr(t, res).Code, "a malformed line suffix is refused, not read as a path")
 	})
 
-	// "148-146" once reached the slice as lines[147:146] and panicked, and the
-	// whole call of thirteen windows was lost to one typo. An inverted range is
-	// the caller's mistake, and the answer says which window made it.
+	// An inverted range is refused, and the answer names the window.
 	t.Run("a window that ends before it starts is BadArgs", func(t *testing.T) {
 		res, _ := s.Call(ctx, ToolCodeRead, map[string]any{
 			"repo": "apisrv", "ref": sha,
